@@ -8,8 +8,14 @@ function h($str) {
     return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
 }
 
+// POSTリクエストか、セッションに必要なデータがあるかを確認
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && (!isset($_SESSION['name']) || !isset($_SESSION['email']) || !isset($_SESSION['phone']) || !isset($_SESSION['subject']) || !isset($_SESSION['message']))) {
+    header('Location: input.php');
+    exit();
+}
+
+// 入力データのバリデーション
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // 入力データのバリデーション
     $name = $_POST['name'] ?? '';
     $email = $_POST['email'] ?? '';
     $phone = $_POST['phone'] ?? '';
@@ -54,12 +60,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['phone'] = h($phone);
     $_SESSION['subject'] = h($subject);
     $_SESSION['message'] = h($message);
-
-    // もしセッションにデータがなければ、input.phpにリダイレクトする
-if (!isset($_SESSION['name']) || empty($_SESSION['name'])) {
-    header('Location: input.php');
-    exit();
-}
+} else {
+    // POSTリクエストでない場合、セッションからデータを取得
+    $name = $_SESSION['name'];
+    $email = $_SESSION['email'];
+    $phone = $_SESSION['phone'];
+    $subject = $_SESSION['subject'];
+    $message = $_SESSION['message'];
 }
 ?>
 
@@ -68,8 +75,8 @@ if (!isset($_SESSION['name']) || empty($_SESSION['name'])) {
 <head>
     <meta charset="UTF-8">
     <title>確認画面</title>
-    <link rel="stylesheet" href="../css/reset.css">
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container">

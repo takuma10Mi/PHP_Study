@@ -10,8 +10,8 @@ unset($_SESSION['errors']);
 <head>
     <meta charset="UTF-8">
     <title>お問い合わせフォーム</title>
-    <link rel="stylesheet" href="../css/reset.css">
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container">

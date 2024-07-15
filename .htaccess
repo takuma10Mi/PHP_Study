@@ -1,3 +1,0 @@
-SetEnv DB_NAME 'mysql:host=localhost;dbname=contact;charset=utf8'
-SetEnv DB_USERNAME 'root'
-SetEnv DB_PASSWORD 'root'

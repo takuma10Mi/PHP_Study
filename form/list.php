@@ -37,6 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_selected'])) {
     <title>お問い合わせ一覧</title>
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/favorite.js"></script>
     <script>
         function confirmDelete() {
             return confirm('本当に削除しますか？');
@@ -60,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_selected'])) {
                         <th>電話番号</th>
                         <th>件名</th>
                         <th>編集</th>
+                        <th>お気に入り</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -72,11 +75,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_selected'])) {
                                 <td><?php echo htmlspecialchars($inquiry['phone'], ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td><?php echo htmlspecialchars($inquiry['subject'], ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td><a href="edit.php?id=<?php echo htmlspecialchars($inquiry['id'], ENT_QUOTES, 'UTF-8'); ?>">編集</a></td>
+                                <td>
+                                    <button class="favorite-btn" data-id="<?php echo htmlspecialchars($inquiry['id'], ENT_QUOTES, 'UTF-8'); ?>" data-favorite="<?php echo htmlspecialchars($inquiry['favorite'], ENT_QUOTES, 'UTF-8'); ?>">
+                                        <?php echo $inquiry['favorite'] ? '★' : '☆'; ?>
+                                    </button>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6">結果が見つかりませんでした。</td>
+                            <td colspan="7">結果が見つかりませんでした。</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>

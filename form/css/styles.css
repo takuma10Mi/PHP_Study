@@ -82,6 +82,31 @@ a:hover {
     text-decoration: underline;
 }
 
+.favorite-btn {
+    background-color: transparent;
+    border: none;
+    color: #FFD700; /* ゴールデンイエロー */
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+.favorite-btn:hover {
+    color: #FFA500; /* オレンジ色、ホバー時に少し濃い色に */
+}
+
+.favorite-btn:focus {
+    outline: none;
+}
+
+.favorite-btn[data-favorite="1"] {
+    color: #FFA500; /* オレンジ色、選択時の色 */
+}
+
+.favorite-btn[data-favorite="0"] {
+    color: #FFD700; /* 非選択時の色 */
+}
+
+
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
     .container {

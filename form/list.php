@@ -2,8 +2,16 @@
 session_start();
 require 'db.php';
 
+$search = $_GET['search'] ?? '';
+
 $dbh = getDbConnection();
-$stmt = $dbh->prepare("SELECT * FROM inquiries");
+if (!empty($search)) {
+    $stmt = $dbh->prepare("SELECT * FROM inquiries WHERE name LIKE :search OR email LIKE :search OR phone LIKE :search OR subject LIKE :search OR message LIKE :search");
+    $searchTerm = '%' . $search . '%';
+    $stmt->bindValue(':search', $searchTerm, PDO::PARAM_STR);
+} else {
+    $stmt = $dbh->prepare("SELECT * FROM inquiries");
+}
 $stmt->execute();
 $inquiries = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -12,8 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_selected'])) {
     if (!empty($idsToDelete)) {
         $placeholders = implode(',', array_fill(0, count($idsToDelete), '?'));
         $stmt = $dbh->prepare("DELETE FROM inquiries WHERE id IN ($placeholders)");
-        $stmt->execute($idsToDelete);
-        header('Location: list.php');
+        foreach ($idsToDelete as $index => $id) {
+            $stmt->bindValue(($index + 1), $id, PDO::PARAM_INT);
+        }
+        $stmt->execute();
+        header('Location: list.php?search=' . urlencode($search));
         exit();
     }
 }
@@ -35,7 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_selected'])) {
 <body>
     <div class="container">
         <h1>お問い合わせ一覧</h1>
-        <form action="list.php" method="post" onsubmit="return confirmDelete();">
+        <form action="list.php" method="get">
+            <input type="text" name="search" value="<?php echo htmlspecialchars($search, ENT_QUOTES, 'UTF-8'); ?>" placeholder="検索...">
+            <input type="submit" value="検索">
+        </form>
+        <form action="list.php?search=<?php echo urlencode($search); ?>" method="post" onsubmit="return confirmDelete();">
             <table>
                 <thead>
                     <tr>
@@ -48,16 +63,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_selected'])) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($inquiries as $inquiry): ?>
+                    <?php if (!empty($inquiries)): ?>
+                        <?php foreach ($inquiries as $inquiry): ?>
+                            <tr>
+                                <td><input type="checkbox" name="delete[]" value="<?php echo htmlspecialchars($inquiry['id'], ENT_QUOTES, 'UTF-8'); ?>"></td>
+                                <td><?php echo htmlspecialchars($inquiry['name'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($inquiry['email'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($inquiry['phone'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($inquiry['subject'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><a href="edit.php?id=<?php echo htmlspecialchars($inquiry['id'], ENT_QUOTES, 'UTF-8'); ?>">編集</a></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
                         <tr>
-                            <td><input type="checkbox" name="delete[]" value="<?php echo htmlspecialchars($inquiry['id'], ENT_QUOTES, 'UTF-8'); ?>"></td>
-                            <td><?php echo htmlspecialchars($inquiry['name'], ENT_QUOTES, 'UTF-8'); ?></td>
-                            <td><?php echo htmlspecialchars($inquiry['email'], ENT_QUOTES, 'UTF-8'); ?></td>
-                            <td><?php echo htmlspecialchars($inquiry['phone'], ENT_QUOTES, 'UTF-8'); ?></td>
-                            <td><?php echo htmlspecialchars($inquiry['subject'], ENT_QUOTES, 'UTF-8'); ?></td>
-                            <td><a href="edit.php?id=<?php echo htmlspecialchars($inquiry['id'], ENT_QUOTES, 'UTF-8'); ?>">編集</a></td>
+                            <td colspan="6">結果が見つかりませんでした。</td>
                         </tr>
-                    <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
             <input type="submit" name="delete_selected" value="選択した項目を削除">
